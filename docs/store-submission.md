@@ -43,19 +43,28 @@ flutter build appbundle --release --dart-define-from-file=env.json
    - 연령 등급 설문: 사용자 생성 콘텐츠가 있다고 정직하게 응답
    - **앱 개인정보 보호(영양 라벨)**: 수집 데이터 = 사용자 콘텐츠(글, 댓글), 식별자(익명 사용자 ID). 모두 "사용자와 연결됨", **추적 없음**, 광고 없음
    - 수출 규정: 표준 암호화만 사용 (`ITSAppUsesNonExemptEncryption=false` 설정됨)
-5. **심사 메모 (App Review Information)** — 아래 문안을 붙여 넣으세요.
+5. **심사 메모 (App Review Information)** — 심사관이 읽으므로 영문으로 작성했습니다. **"Sign-in required" 체크는 해제**하고, 아래 문안을 Notes에 붙여 넣으세요.
 
 ```
-로그인 정보는 필요하지 않습니다. 앱은 익명 로그인을 사용하며, 첫 화면에서 약관에 동의하고
-"시작하기"를 누른 뒤 닉네임·지역(울산)·학교급을 선택하면 모든 기능을 사용할 수 있습니다.
+No sign-in is required. The app uses anonymous authentication (no email, phone number or password).
 
-사용자 생성 콘텐츠(Guideline 1.2) 대응:
-- 약관 동의: 가입 전 이용약관·개인정보 처리방침에 필수 동의
-- 신고: 모든 글/댓글에서 신고 가능(사유 선택). 신고가 3건 누적되면 자동으로 숨김 처리
-- 차단: 작성자 차단 및 차단 해제(내 정보 > 차단한 사용자)
-- 필터: 전화번호·주민등록번호 형태의 개인정보는 작성 시 차단
-- 연락처: orangenova91@gmail.com — 신고 확인 후 24시간 내 조치를 목표로 합니다
-- 계정 삭제: 내 정보 > 계정 삭제 (서버 데이터 즉시 삭제)
+HOW TO TEST
+1. Launch the app, check the terms agreement box, and tap "시작하기" (Start).
+2. On the profile screen keep the default region "울산" (Ulsan), choose any school level (e.g. "고등"), and tap "완료" (Done).
+   IMPORTANT: Ulsan is currently the only region where posting is enabled. Other regions can be selected but are marked "준비 중" (coming soon) and posting is disabled there.
+3. You can now browse the two boards (속닥방 / 노하우방), write a post with the pencil "글쓰기" button, react to posts, comment and reply.
+
+The app UI is in Korean. It is an anonymous community app for teachers in Korea.
+
+USER-GENERATED CONTENT SAFEGUARDS (Guideline 1.2)
+- Terms: users must agree to the Terms of Use and Privacy Policy before signing up. The terms prohibit objectionable content, harassment and disclosure of personal information.
+- Report: every post and comment has a "..." menu -> "신고" (Report) with a reason selection. Content reported by 3 users is automatically hidden from other users.
+- Block: "..." menu -> "작성자 차단" (Block author). The blocked user's content is hidden immediately. Blocks can be undone in the "내 정보" (My Info) tab -> "차단한 사용자" (Blocked users).
+- Filtering: posts and comments containing phone-number or resident-registration-number patterns are rejected when submitting.
+- Contact: orangenova91@gmail.com. We aim to review reports and act within 24 hours.
+- Account deletion: "내 정보" (My Info) tab -> "계정 삭제" (Delete account) permanently deletes the account and all of its content.
+
+The app does not use ads, tracking, or third-party sign-in.
 ```
 
 6. **심사 제출** → 결과까지 보통 1~3일. 반려에 대비해 **늦어도 10/1까지 제출**.
