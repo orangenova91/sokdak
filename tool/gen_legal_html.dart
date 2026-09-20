@@ -2,7 +2,7 @@
 //
 //   dart run tool/gen_legal_html.dart
 //
-// 결과: docs/index.html (지원 페이지), docs/legal/{privacy,terms,account-deletion}.html
+// 결과: docs/index.html (지원 페이지), docs/legal/{privacy,terms,account-deletion,child-safety}.html
 // 약관 본문은 앱 안의 텍스트(lib/features/me/legal_texts.dart)와 같은 원본을 쓴다.
 // GitHub Pages(소스: main 브랜치의 /docs 폴더)로 게시하면 스토어 등록에 필요한 URL이 된다.
 import 'dart:io';
@@ -78,6 +78,7 @@ String renderSupport() {
 <li><a href="legal/terms.html">이용약관</a></li>
 <li><a href="legal/privacy.html">개인정보 처리방침</a></li>
 <li><a href="legal/account-deletion.html">계정 삭제 안내</a></li>
+<li><a href="legal/child-safety.html">아동 안전 표준</a></li>
 </ul>''';
   return page(
     title: '지원',
@@ -97,6 +98,7 @@ void main() {
     '${legal.path}/account-deletion.html': renderLegal(
       withContactSection(accountDeletionGuide),
     ),
+    '${legal.path}/child-safety.html': renderLegal(childSafetyStandards),
   };
   files.forEach((path, html) {
     File(path).writeAsStringSync(html);

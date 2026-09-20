@@ -115,6 +115,44 @@ const accountDeletionGuide = LegalDocument(
   ],
 );
 
+/// Google Play 아동 안전 표준 선언에 제출하는 공개 웹 페이지용 본문(앱 화면에는 표시하지 않음).
+const childSafetyStandards = LegalDocument(
+  title: '아동 안전 표준',
+  sections: [
+    LegalSection(
+      '기본 원칙',
+      '교무실 속닥속닥은 아동·청소년에 대한 성적 착취 및 학대(CSAE)와 아동 성적 학대 콘텐츠(CSAM)를 '
+          '어떤 형태로도 허용하지 않습니다. 이러한 내용을 게시하거나 유통하려는 시도는 이용약관 위반이며, '
+          '발견 즉시 삭제하고 관련 법령에 따라 조치합니다.',
+    ),
+    LegalSection(
+      '서비스의 성격',
+      '이 서비스는 교원을 위한 익명 커뮤니티이며, 글과 댓글은 텍스트만 지원합니다. 이미지, 영상, 파일을 '
+          '올리는 기능과 이용자 간 1:1 메시지·채팅 기능은 없습니다.',
+    ),
+    LegalSection(
+      '신고 방법',
+      '• 앱 안에서: 글이나 댓글의 [⋯] 메뉴에서 [신고]를 누르고 사유를 선택합니다. 신고가 3건 이상 쌓이면 '
+          '해당 내용은 다른 이용자에게 자동으로 숨겨집니다.\n'
+          '• 이메일로: ${AppInfo.contactEmail}',
+    ),
+    LegalSection(
+      '신고 이후의 조치',
+      '운영자는 접수된 신고를 확인하여 해당 글과 댓글을 삭제하고, 작성 계정을 삭제하거나 이용을 제한합니다. '
+          '아동·청소년 대상 성적 착취 및 학대와 관련된 사안은 관련 법령에 따라 수사기관에 신고하고 '
+          '수사에 협조합니다.',
+    ),
+    LegalSection(
+      '아동 안전 담당자',
+      '아동 안전 관련 문의와 신고는 아래 담당 연락처로 받습니다.\n${AppInfo.contactEmail}',
+    ),
+    LegalSection(
+      '법령 준수',
+      '운영자는 아동·청소년 보호와 관련된 대한민국 법령을 준수하며, 이 표준은 필요에 따라 갱신됩니다.',
+    ),
+  ],
+);
+
 /// 문의 이메일이 설정되어 있으면 문서 끝에 "문의" 항목을 붙인다.
 LegalDocument withContactSection(LegalDocument document) {
   if (AppInfo.contactEmail.isEmpty) return document;
