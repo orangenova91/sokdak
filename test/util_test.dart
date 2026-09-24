@@ -42,5 +42,19 @@ void main() {
       expect(ContentGuard.check('오늘 3교시에 2학년 5반 수업이 있었어요'), isNull);
       expect(ContentGuard.check('시험은 2026년 11월 12일이에요'), isNull);
     });
+
+    test('욕설을 감지한다 (붙여 쓰기, 띄어 쓰기, 특수문자 우회 모두)', () {
+      expect(ContentGuard.check('저 학부모 진짜 씨발 너무하네요'), isNotNull);
+      expect(ContentGuard.check('시 발 진짜'), isNotNull);
+      expect(ContentGuard.check('시*발 이게 뭐야'), isNotNull);
+      expect(ContentGuard.check('ㅅㅂ 진짜 힘드네요'), isNotNull);
+      expect(ContentGuard.check('That teacher is such a bitch'), isNotNull);
+    });
+
+    test('평범한 단어는 욕설로 오탐하지 않는다', () {
+      expect(ContentGuard.check('수업 준비로 정신이 없었어요'), isNull);
+      expect(ContentGuard.check('학생이 오늘 발표를 정말 잘했어요'), isNull);
+      expect(ContentGuard.check('병가를 내야 할 것 같아요'), isNull);
+    });
   });
 }
