@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/config/env.dart';
-import 'school.dart';
 import 'school_providers.dart';
 import 'week_calendar.dart';
 
@@ -36,7 +35,7 @@ class DashboardScreen extends ConsumerWidget {
             onRetry: () => ref.invalidate(mySchoolProvider),
           ),
           data: (school) =>
-              school == null ? const _NoSchoolState() : _SchoolDashboard(school: school),
+              school == null ? const _NoSchoolState() : const _SchoolDashboard(),
         ),
       ),
     );
@@ -149,9 +148,7 @@ class _NoSchoolState extends StatelessWidget {
 }
 
 class _SchoolDashboard extends ConsumerWidget {
-  const _SchoolDashboard({required this.school});
-
-  final SchoolSelection school;
+  const _SchoolDashboard();
 
   Future<void> _refresh(WidgetRef ref) async {
     ref.invalidate(todayMealProvider);
@@ -174,8 +171,6 @@ class _SchoolDashboard extends ConsumerWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
         children: [
-          Text(school.schoolName, style: textTheme.titleLarge),
-          const SizedBox(height: 20),
           Text('학사일정', style: textTheme.titleMedium),
           const SizedBox(height: 12),
           const WeekCalendarCard(),
