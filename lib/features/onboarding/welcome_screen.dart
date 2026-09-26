@@ -66,9 +66,11 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                     body: '닉네임, 지역, 학교급만 정하면 바로 시작할 수 있어요.',
                   ),
                   const _Point(
-                    icon: Icons.phone_iphone,
-                    title: '앱을 지우면 계정이 사라져요',
-                    body: '익명 계정은 복구할 수 없어요. 폰을 바꾸거나 앱을 다시 설치하면 새로 시작해야 해요.',
+                    icon: Icons.lock_outline,
+                    title: '아이디·비밀번호로 계정을 지켜요',
+                    body:
+                        '다음 화면에서 아이디와 비밀번호를 정하면, 앱을 지우거나 기기를 바꿔도 '
+                        '같은 계정으로 다시 로그인할 수 있어요.',
                   ),
                   const _Point(
                     icon: Icons.shield_outlined,

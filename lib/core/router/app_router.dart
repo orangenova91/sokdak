@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/auth_providers.dart';
-import '../../features/auth/credentials_setup_screen.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/board/compose_screen.dart';
 import '../../features/board/feed_screen.dart';
@@ -13,6 +12,7 @@ import '../../features/me/blocked_users_screen.dart';
 import '../../features/me/legal_screen.dart';
 import '../../features/me/legal_texts.dart';
 import '../../features/me/my_page_screen.dart';
+import '../../features/onboarding/credentials_step_screen.dart';
 import '../../features/onboarding/profile_setup_screen.dart';
 import '../../features/onboarding/welcome_screen.dart';
 import '../../features/profile/profile_providers.dart';
@@ -20,13 +20,13 @@ import '../../features/system/system_screens.dart';
 import '../config/env.dart';
 import 'main_shell.dart';
 
-/// 로그인/프로필 상태에 따라 갈 수 있는 화면이 정해진다.
-/// 온보딩 전용 경로에 있는 사용자가 프로필을 갖추면 홈으로 보낸다.
+/// 가입이 다 끝난 사용자가 이 경로들에 있으면 홈으로 돌려보낸다.
 const _gatedPaths = {
   '/setup-required',
   '/welcome',
+  '/credentials-step',
+  '/profile-details',
   '/splash',
-  '/profile-setup',
   '/error',
 };
 
@@ -49,12 +49,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     // 약관과 로그인 화면은 가입 전에도 볼 수 있어야 한다.
     if (location.startsWith('/legal/') || location == '/login') return null;
 
-    if (ref.read(currentUserProvider) == null) return goTo('/welcome');
+    final user = ref.read(currentUserProvider);
+    if (user == null) return goTo('/welcome');
+
+    if (user.isAnonymous) {
+      // 가입 1단계(계정 보호)를 아직 마치지 않았다. 건너뛸 수 없다.
+      return goTo('/credentials-step');
+    }
 
     final profile = ref.read(myProfileProvider);
     if (profile.hasError && !profile.hasValue) return goTo('/error');
     if (!profile.hasValue) return goTo('/splash');
-    if (profile.requireValue == null) return goTo('/profile-setup');
+
+    if (profile.requireValue == null) {
+      // 계정 보호는 끝났지만 프로필이 없다 → 2단계로.
+      // 2단계에서 "뒤로"를 누르면 1단계로 돌아가 아이디·비밀번호를 고칠 수 있으니
+      // 두 경로 모두 강제로 옮기지 않고 그대로 둔다.
+      if (location == '/credentials-step' || location == '/profile-details') {
+        return null;
+      }
+      return goTo('/profile-details');
+    }
 
     return _gatedPaths.contains(location) ? '/' : null;
   }
@@ -111,10 +126,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/blocked',
         builder: (context, state) => const BlockedUsersScreen(),
       ),
-      GoRoute(
-        path: '/credentials',
-        builder: (context, state) => const CredentialsSetupScreen(),
-      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/legal/:type',
@@ -131,7 +142,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
-        path: '/profile-setup',
+        path: '/credentials-step',
+        builder: (context, state) => const CredentialsStepScreen(),
+      ),
+      GoRoute(
+        path: '/profile-details',
         builder: (context, state) => const ProfileSetupScreen(),
       ),
       GoRoute(

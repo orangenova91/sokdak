@@ -96,6 +96,8 @@ class MyPageScreen extends ConsumerWidget {
               ),
             ),
           const Divider(height: 1),
+          // 가입 과정에서 아이디·비밀번호를 필수로 만들기 때문에, 정상적인 계정이라면
+          // 이 화면에 도달했을 때는 항상 설정이 끝나 있다.
           if (hasCredentials)
             ListTile(
               leading: Icon(
@@ -104,13 +106,6 @@ class MyPageScreen extends ConsumerWidget {
               ),
               title: const Text('계정 보호 설정됨'),
               subtitle: Text('아이디: $username'),
-            )
-          else
-            ListTile(
-              leading: const Icon(Icons.lock_outline),
-              title: const Text('계정 보호 설정'),
-              subtitle: const Text('아이디·비밀번호를 만들어 다른 기기에서도 로그인할 수 있어요'),
-              onTap: () => context.push('/credentials'),
             ),
           ListTile(
             leading: const Icon(Icons.block),
