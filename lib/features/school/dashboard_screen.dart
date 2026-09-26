@@ -43,20 +43,46 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-class _DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
+class _DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
   const _DashboardAppBar();
 
   @override
-  Widget build(BuildContext context) => AppBar(
-    title: const Text('대시보드'),
-    actions: [
-      IconButton(
-        onPressed: () => context.push('/school-search'),
-        icon: const Icon(Icons.school_outlined),
-        tooltip: '학교 설정',
-      ),
-    ],
-  );
+  Widget build(BuildContext context, WidgetRef ref) {
+    final schoolName = ref.watch(mySchoolProvider).value?.schoolName;
+    final colors = Theme.of(context).colorScheme;
+
+    return AppBar(
+      title: const Text('대시보드'),
+      actions: [
+        if (schoolName != null)
+          Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 140),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: colors.secondaryContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  schoolName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: colors.onSecondaryContainer,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        IconButton(
+          onPressed: () => context.push('/school-search'),
+          icon: const Icon(Icons.account_balance_outlined),
+          tooltip: '학교 설정',
+        ),
+      ],
+    );
+  }
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
