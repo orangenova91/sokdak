@@ -47,7 +47,16 @@ class _DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
   const _DashboardAppBar();
 
   @override
-  Widget build(BuildContext context) => AppBar(title: const Text('대시보드'));
+  Widget build(BuildContext context) => AppBar(
+    title: const Text('대시보드'),
+    actions: [
+      IconButton(
+        onPressed: () => context.push('/school-search'),
+        icon: const Icon(Icons.school_outlined),
+        tooltip: '학교 설정',
+      ),
+    ],
+  );
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -139,17 +148,7 @@ class _SchoolDashboard extends ConsumerWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(school.schoolName, style: textTheme.titleLarge),
-              ),
-              TextButton(
-                onPressed: () => context.push('/school-search'),
-                child: const Text('학교 변경'),
-              ),
-            ],
-          ),
+          Text(school.schoolName, style: textTheme.titleLarge),
           const SizedBox(height: 20),
           Text('학사일정', style: textTheme.titleMedium),
           const SizedBox(height: 12),
