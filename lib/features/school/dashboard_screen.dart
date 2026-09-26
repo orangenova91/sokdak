@@ -7,8 +7,7 @@ import 'school.dart';
 import 'school_providers.dart';
 import 'week_calendar.dart';
 
-/// 하단 탭의 "대시보드" 화면. 등록한 학교의 오늘 급식을 보여준다.
-/// 학사일정 등 다른 정보는 이후에 추가할 예정.
+/// 하단 탭의 "대시보드" 화면. 등록한 학교의 학사일정과 오늘 급식을 보여준다.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -133,7 +132,6 @@ class _SchoolDashboard extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
     final meals = ref.watch(todayMealProvider);
-    final schedule = ref.watch(upcomingScheduleProvider);
 
     return RefreshIndicator(
       onRefresh: () => _refresh(ref),
@@ -153,6 +151,10 @@ class _SchoolDashboard extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
+          Text('학사일정', style: textTheme.titleMedium),
+          const SizedBox(height: 12),
+          const WeekCalendarCard(),
+          const SizedBox(height: 28),
           Text('오늘 급식', style: textTheme.titleMedium),
           const SizedBox(height: 12),
           meals.when(
@@ -218,70 +220,8 @@ class _SchoolDashboard extends ConsumerWidget {
                     ],
                   ),
           ),
-          const SizedBox(height: 28),
-          Text('학사일정', style: textTheme.titleMedium),
-          const SizedBox(height: 12),
-          const WeekCalendarCard(),
-          const SizedBox(height: 20),
-          Text('다가오는 일정', style: textTheme.titleSmall),
-          const SizedBox(height: 12),
-          schedule.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (_, _) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Row(
-                children: [
-                  Text(
-                    '학사일정을 불러오지 못했어요.',
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: () => ref.invalidate(scheduleEventsProvider),
-                    child: const Text('다시 시도'),
-                  ),
-                ],
-              ),
-            ),
-            data: (events) => events.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      '다가오는 학사일정이 없어요.',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  )
-                : Card(
-                    margin: EdgeInsets.zero,
-                    child: Column(
-                      children: [
-                        for (final event in events)
-                          ListTile(
-                            leading: Icon(
-                              Icons.event_outlined,
-                              color: colors.primary,
-                            ),
-                            title: Text(event.name),
-                            trailing: Text(_formatEventDate(event.date)),
-                          ),
-                      ],
-                    ),
-                  ),
-          ),
         ],
       ),
     );
   }
 }
-
-const _weekdayLabels = ['월', '화', '수', '목', '금', '토', '일'];
-
-String _formatEventDate(DateTime date) =>
-    '${date.month}월 ${date.day}일 (${_weekdayLabels[date.weekday - 1]})';
