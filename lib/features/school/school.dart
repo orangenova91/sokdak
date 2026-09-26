@@ -43,3 +43,11 @@ class MealInfo {
   final String mealName;
   final List<String> menuItems;
 }
+
+/// 나이스 학사일정 API의 한 이벤트(입학식, 시험, 방학식 등).
+class SchoolEvent {
+  const SchoolEvent({required this.date, required this.name});
+
+  final DateTime date;
+  final String name;
+}

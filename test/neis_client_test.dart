@@ -60,4 +60,39 @@ void main() {
       );
     });
   });
+
+  group('parseScheduleRows', () {
+    Map<String, dynamic> row(String ymd, String eventName) => {
+      'AA_YMD': ymd,
+      'EVENT_NM': eventName,
+    };
+
+    test('반복되는 토요휴업일·방학 나열은 제외하고 의미 있는 이벤트만 남긴다', () {
+      final rows = [
+        row('20250906', '토요휴업일'),
+        row('20250913', '토요휴업일'),
+        row('20250725', '여름방학식'),
+        row('20250726', '여름방학'),
+        row('20250727', '여름방학'),
+        row('20250826', '개학식'),
+        row('20250815', '광복절'),
+      ];
+      final events = parseScheduleRows(rows);
+      expect(events.map((e) => e.name), [
+        '여름방학식',
+        '광복절',
+        '개학식',
+      ]);
+    });
+
+    test('날짜순으로 정렬한다', () {
+      final rows = [row('20251003', '개천절'), row('20250505', '어린이날')];
+      final events = parseScheduleRows(rows);
+      expect(events.map((e) => e.name), ['어린이날', '개천절']);
+    });
+
+    test('행사명이 비어 있으면 제외한다', () {
+      expect(parseScheduleRows([row('20250101', '')]), isEmpty);
+    });
+  });
 }

@@ -64,6 +64,26 @@ class NeisClient {
         .toList();
   }
 
+  /// 지정한 기간의 학사일정을 날짜순으로 가져온다. 매주 반복되는 토요휴업일,
+  /// 방학 기간을 하루씩 나열하는 항목은 정보성이 낮아 제외한다(방학의 시작/끝은
+  /// "여름방학식"/"개학식" 같은 별도 항목으로 이미 나온다).
+  Future<List<SchoolEvent>> fetchSchedule({
+    required String officeCode,
+    required String schoolCode,
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    final body = await _get('SchoolSchedule', {
+      'ATPT_OFCDC_SC_CODE': officeCode,
+      'SD_SCHUL_CODE': schoolCode,
+      'AA_FROM_YMD': DateFormat('yyyyMMdd').format(from),
+      'AA_TO_YMD': DateFormat('yyyyMMdd').format(to),
+      'pSize': '100',
+    });
+    final rows = extractNeisRows(body, 'SchoolSchedule');
+    return parseScheduleRows(rows);
+  }
+
   Future<Map<String, dynamic>> _get(
     String endpoint,
     Map<String, String> params,
@@ -83,6 +103,34 @@ class NeisClient {
     return jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
   }
 }
+
+const _noisyEventNames = {'토요휴업일', '일요일', '여름방학', '겨울방학'};
+
+/// 나이스 학사일정 row 목록을 날짜순으로 정렬하고, 매주 반복되는 토요휴업일이나
+/// 방학을 하루씩 나열하는 항목처럼 정보성이 낮은 이벤트는 제외한다.
+/// 개수 제한은 호출하는 쪽(화면·프로바이더)의 몫으로 남겨둔다.
+List<SchoolEvent> parseScheduleRows(List<Map<String, dynamic>> rows) {
+  final events = rows
+      .map(
+        (row) => SchoolEvent(
+          date: _parseYmd(row['AA_YMD'] as String),
+          name: (row['EVENT_NM'] as String?) ?? '',
+        ),
+      )
+      .where((event) => event.name.isNotEmpty && !_noisyEventNames.contains(event.name))
+      .toList()
+    ..sort((a, b) => a.date.compareTo(b.date));
+  return events;
+}
+
+/// "yyyyMMdd" 형태의 나이스 날짜 문자열을 파싱한다.
+/// `DateFormat('yyyyMMdd').parse()`는 구분자가 없으면 첫 숫자 필드(yyyy)가
+/// 전체 문자열을 그리디하게 먹어 버려 쓸 수 없다.
+DateTime _parseYmd(String ymd) => DateTime(
+  int.parse(ymd.substring(0, 4)),
+  int.parse(ymd.substring(4, 6)),
+  int.parse(ymd.substring(6, 8)),
+);
 
 /// 나이스 응답에서 실제 데이터 행(row)만 뽑아낸다.
 /// - 정상: `{"<key>": [{"head": [...]}, {"row": [...]}]}`
