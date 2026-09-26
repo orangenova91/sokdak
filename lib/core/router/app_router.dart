@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/auth_providers.dart';
+import '../../features/auth/credentials_setup_screen.dart';
+import '../../features/auth/login_screen.dart';
 import '../../features/board/compose_screen.dart';
 import '../../features/board/feed_screen.dart';
 import '../../features/board/models.dart';
@@ -44,8 +46,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
     if (!Env.isConfigured) return goTo('/setup-required');
 
-    // 약관은 가입 전에도 볼 수 있어야 한다.
-    if (location.startsWith('/legal/')) return null;
+    // 약관과 로그인 화면은 가입 전에도 볼 수 있어야 한다.
+    if (location.startsWith('/legal/') || location == '/login') return null;
 
     if (ref.read(currentUserProvider) == null) return goTo('/welcome');
 
@@ -109,6 +111,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/blocked',
         builder: (context, state) => const BlockedUsersScreen(),
       ),
+      GoRoute(
+        path: '/credentials',
+        builder: (context, state) => const CredentialsSetupScreen(),
+      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/legal/:type',
         builder: (context, state) => LegalScreen(

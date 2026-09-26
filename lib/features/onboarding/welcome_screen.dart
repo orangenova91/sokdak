@@ -114,6 +114,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
                           : const Text('시작하기'),
                     ),
                   ),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => context.push('/login'),
+                      child: const Text('이미 계정이 있으신가요? 로그인'),
+                    ),
+                  ),
                 ],
               ),
             ),

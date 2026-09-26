@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/config/app_info.dart';
 import '../../core/supabase/supabase_provider.dart';
+import '../auth/auth_providers.dart';
 import '../board/board_providers.dart';
 import '../board/report_sheet.dart';
 import '../profile/profile_providers.dart';
@@ -32,6 +33,24 @@ class MyPageScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    final yes = await confirm(
+      context,
+      title: '로그아웃',
+      message: '아이디와 비밀번호로 언제든 다시 로그인할 수 있어요.',
+      confirmLabel: '로그아웃',
+    );
+    if (!yes) return;
+    try {
+      await ref.read(authRepositoryProvider).signOut();
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('로그아웃하지 못했어요. 다시 시도해 주세요.')));
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
@@ -42,6 +61,9 @@ class MyPageScreen extends ConsumerWidget {
         ?.where((r) => r.code == profile?.regionCode)
         .firstOrNull
         ?.name;
+    final hasCredentials = ref.watch(hasCredentialsProvider);
+    final user = ref.watch(currentUserProvider);
+    final username = hasCredentials ? user?.email?.split('@').first : null;
 
     return Scaffold(
       appBar: AppBar(title: const Text('내 정보')),
@@ -74,6 +96,22 @@ class MyPageScreen extends ConsumerWidget {
               ),
             ),
           const Divider(height: 1),
+          if (hasCredentials)
+            ListTile(
+              leading: Icon(
+                Icons.verified_user_outlined,
+                color: colors.primary,
+              ),
+              title: const Text('계정 보호 설정됨'),
+              subtitle: Text('아이디: $username'),
+            )
+          else
+            ListTile(
+              leading: const Icon(Icons.lock_outline),
+              title: const Text('계정 보호 설정'),
+              subtitle: const Text('아이디·비밀번호를 만들어 다른 기기에서도 로그인할 수 있어요'),
+              onTap: () => context.push('/credentials'),
+            ),
           ListTile(
             leading: const Icon(Icons.block),
             title: const Text('차단한 사용자'),
@@ -96,6 +134,12 @@ class MyPageScreen extends ConsumerWidget {
               subtitle: const Text(AppInfo.contactEmail),
             ),
           const Divider(height: 1),
+          if (hasCredentials)
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('로그아웃'),
+              onTap: () => _signOut(context, ref),
+            ),
           ListTile(
             leading: Icon(Icons.delete_outline, color: colors.error),
             title: Text('계정 삭제', style: TextStyle(color: colors.error)),
@@ -103,8 +147,8 @@ class MyPageScreen extends ConsumerWidget {
           ),
           if (kDebugMode)
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('개발용: 로그아웃 (계정은 서버에 남음)'),
+              leading: const Icon(Icons.bug_report_outlined),
+              title: const Text('개발용: 강제 로그아웃 (계정 보호 미설정 시 복구 불가)'),
               onTap: () => ref.read(supabaseProvider).auth.signOut(),
             ),
         ],
