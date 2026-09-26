@@ -125,10 +125,14 @@ class _NoSchoolState extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.restaurant_outlined, size: 48, color: colors.primary),
+                  Icon(
+                    Icons.account_balance_outlined,
+                    size: 48,
+                    color: colors.primary,
+                  ),
                   const SizedBox(height: 16),
                   Text(
-                    '학교를 등록하면\n오늘 급식을 볼 수 있어요',
+                    '학교를 등록하면\n학사일정과 급식 정보를 볼 수 있어요',
                     textAlign: TextAlign.center,
                     style: textTheme.titleMedium,
                   ),
