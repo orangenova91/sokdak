@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../profile/profile_providers.dart';
+import '../school/meal_dashboard_card.dart';
 import 'board_providers.dart';
 import 'models.dart';
 import 'post_card.dart';
@@ -73,6 +74,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       ),
       body: Column(
         children: [
+          if (widget.board == Board.sokdak) const MealDashboardCard(),
           SizedBox(
             height: 48,
             child: ListView(

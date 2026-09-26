@@ -16,6 +16,7 @@ import '../../features/onboarding/credentials_step_screen.dart';
 import '../../features/onboarding/profile_setup_screen.dart';
 import '../../features/onboarding/welcome_screen.dart';
 import '../../features/profile/profile_providers.dart';
+import '../../features/school/school_search_screen.dart';
 import '../../features/system/system_screens.dart';
 import '../config/env.dart';
 import 'main_shell.dart';
@@ -125,6 +126,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/blocked',
         builder: (context, state) => const BlockedUsersScreen(),
+      ),
+      GoRoute(
+        path: '/school-search',
+        builder: (context, state) => const SchoolSearchScreen(),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
