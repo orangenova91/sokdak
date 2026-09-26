@@ -16,6 +16,7 @@ import '../../features/onboarding/credentials_step_screen.dart';
 import '../../features/onboarding/profile_setup_screen.dart';
 import '../../features/onboarding/welcome_screen.dart';
 import '../../features/profile/profile_providers.dart';
+import '../../features/school/dashboard_screen.dart';
 import '../../features/school/school_search_screen.dart';
 import '../../features/system/system_screens.dart';
 import '../config/env.dart';
@@ -84,6 +85,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) =>
             MainShell(navigationShell: navigationShell),
         branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/dashboard',
+                builder: (context, state) => const DashboardScreen(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(
