@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../profile/profile_providers.dart';
+import '../../core/widgets/app_mark.dart';
 import 'board_providers.dart';
 import 'models.dart';
 import 'post_card.dart';
@@ -49,22 +49,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final profile = ref.watch(myProfileProvider).value;
-    final regions = ref.watch(regionsProvider).value;
-    final region = regions
-        ?.where((r) => r.code == profile?.regionCode)
-        .firstOrNull;
     final categories =
         ref.watch(categoriesProvider(widget.board)).value ?? const [];
     final feed = ref.watch(feedProvider(_key));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          region == null
-              ? widget.board.label
-              : '${region.name} ${widget.board.label}',
-        ),
+        leading: const AppMark(),
+        leadingWidth: AppMark.leadingWidth,
+        titleSpacing: AppMark.titleSpacing,
+        title: Text(widget.board.label),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/compose/${widget.board.value}'),
@@ -112,7 +106,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               data: (state) => RefreshIndicator(
                 onRefresh: _refresh,
                 child: state.posts.isEmpty
-                    ? _EmptyFeed(regionReady: region?.isActive ?? true)
+                    ? const _EmptyFeed()
                     : ListView.builder(
                         controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
@@ -165,25 +159,20 @@ class _CategoryChip extends StatelessWidget {
 }
 
 class _EmptyFeed extends StatelessWidget {
-  const _EmptyFeed({required this.regionReady});
-
-  final bool regionReady;
+  const _EmptyFeed();
 
   @override
   Widget build(BuildContext context) {
-    // RefreshIndicator가 동작하려면 스크롤 가능한 위젯이어야 한다.
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      children: [
+      children: const [
         SizedBox(
           height: 320,
           child: Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+              padding: EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                regionReady
-                    ? '아직 글이 없어요.\n첫 이야기를 남겨 보세요!'
-                    : '이 지역은 아직 준비 중이에요.\n열리면 바로 이용할 수 있어요.',
+                '아직 글이 없어요.\n첫 이야기를 남겨 보세요!',
                 textAlign: TextAlign.center,
               ),
             ),

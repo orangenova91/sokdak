@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/util/content_guard.dart';
 import '../../core/util/fuzzy_date.dart';
 import '../auth/auth_providers.dart';
+import '../profile/profile_providers.dart';
 import 'board_providers.dart';
 import 'board_repository.dart';
 import 'models.dart';
@@ -403,14 +404,38 @@ class _PostHeader extends ConsumerWidget {
     final categoryName =
         categories?.where((c) => c.code == post.category).firstOrNull?.name ??
         post.category;
+    final regionName = ref
+        .watch(regionsProvider)
+        .value
+        ?.where((r) => r.code == post.regionCode)
+        .firstOrNull
+        ?.name;
     final title = post.title;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          categoryName,
-          style: textTheme.labelMedium?.copyWith(color: colors.primary),
+        Row(
+          children: [
+            Text(
+              categoryName,
+              style: textTheme.labelMedium?.copyWith(color: colors.primary),
+            ),
+            if (regionName != null) ...[
+              Text(
+                ' · ',
+                style: textTheme.labelMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              Text(
+                regionName,
+                style: textTheme.labelMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 8),
         if (title != null && title.isNotEmpty) ...[

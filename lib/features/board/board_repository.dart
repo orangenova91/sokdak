@@ -32,7 +32,6 @@ class BoardRepository {
 
   Future<List<Post>> fetchPosts({
     required Board board,
-    required String regionCode,
     String? category,
     DateTime? before,
     int limit = 20,
@@ -41,7 +40,6 @@ class BoardRepository {
         .from('posts')
         .select(_postSelect)
         .eq('board', board.value)
-        .eq('region_code', regionCode)
         .eq('is_hidden', false);
     if (category != null) query = query.eq('category', category);
     if (before != null) {

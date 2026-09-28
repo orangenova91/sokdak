@@ -73,11 +73,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return goTo('/profile-details');
     }
 
-    return _gatedPaths.contains(location) ? '/' : null;
+    return _gatedPaths.contains(location) ? '/dashboard' : null;
   }
 
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/dashboard',
     refreshListenable: refresh,
     redirect: (context, state) => redirect(state),
     routes: [

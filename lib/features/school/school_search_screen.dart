@@ -69,6 +69,7 @@ class _SchoolSearchScreenState extends ConsumerState<SchoolSearchScreen> {
           .setSchool(userId: user.id, school: school);
       ref.invalidate(mySchoolProvider);
       ref.invalidate(todayMealProvider);
+      ref.invalidate(weekMealsProvider);
       if (mounted) Navigator.of(context).pop();
     } catch (_) {
       if (!mounted) return;

@@ -58,7 +58,6 @@ class FeedController extends AsyncNotifier<FeedState> {
         .read(boardRepositoryProvider)
         .fetchPosts(
           board: key.board,
-          regionCode: profile.regionCode,
           category: key.category,
           before: before,
           limit: pageSize,
@@ -95,6 +94,23 @@ final feedProvider =
     AsyncNotifierProvider.family<FeedController, FeedState, FeedKey>(
       FeedController.new,
     );
+
+/// 대시보드용 최근 글 미리보기. 게시판당 최신 2개.
+const dashboardPreviewLimit = 2;
+
+final dashboardPreviewProvider = FutureProvider.family<List<Post>, Board>((
+  ref,
+  board,
+) async {
+  final profile = await ref.watch(myProfileProvider.future);
+  if (profile == null) return const [];
+  return ref
+      .watch(boardRepositoryProvider)
+      .fetchPosts(
+        board: board,
+        limit: dashboardPreviewLimit,
+      );
+});
 
 // ---- 글 상세 ----
 

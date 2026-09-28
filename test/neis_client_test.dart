@@ -95,4 +95,64 @@ void main() {
       expect(parseScheduleRows([row('20250101', '')]), isEmpty);
     });
   });
+
+  group('groupMealsByDay', () {
+    Map<String, dynamic> mealRow({
+      required String ymd,
+      required String code,
+      required String name,
+      required String dishes,
+    }) => {
+      'MLSV_YMD': ymd,
+      'MMEAL_SC_CODE': code,
+      'MMEAL_SC_NM': name,
+      'DDISH_NM': dishes,
+    };
+
+    test('기간의 모든 날짜를 채우고 끼니를 코드순으로 정렬한다', () {
+      final rows = [
+        mealRow(
+          ymd: '20250923',
+          code: '2',
+          name: '중식',
+          dishes: '쌀밥<br/>미역국',
+        ),
+        mealRow(
+          ymd: '20250922',
+          code: '3',
+          name: '석식',
+          dishes: '라면',
+        ),
+        mealRow(
+          ymd: '20250922',
+          code: '2',
+          name: '중식',
+          dishes: '비빔밥',
+        ),
+      ];
+      final days = groupMealsByDay(
+        rows,
+        from: DateTime(2025, 9, 21),
+        to: DateTime(2025, 9, 23),
+      );
+
+      expect(days, hasLength(3));
+      expect(days[0].date, DateTime(2025, 9, 21));
+      expect(days[0].meals, isEmpty);
+      expect(days[1].meals.map((m) => m.mealName), ['중식', '석식']);
+      expect(days[2].meals.single.menuItems, ['쌀밥', '미역국']);
+    });
+
+    test('MLSV_YMD가 없거나 형식이 잘못된 row는 무시한다', () {
+      final days = groupMealsByDay(
+        [
+          {'MMEAL_SC_NM': '중식', 'DDISH_NM': '쌀밥'},
+          mealRow(ymd: '2025', code: '2', name: '중식', dishes: '쌀밥'),
+        ],
+        from: DateTime(2025, 9, 22),
+        to: DateTime(2025, 9, 22),
+      );
+      expect(days.single.meals, isEmpty);
+    });
+  });
 }

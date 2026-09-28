@@ -44,6 +44,14 @@ class MealInfo {
   final List<String> menuItems;
 }
 
+/// 하루치 급식(조식/중식/석식). 급식이 없는 날은 [meals]가 비어 있다.
+class DailyMeals {
+  const DailyMeals({required this.date, required this.meals});
+
+  final DateTime date;
+  final List<MealInfo> meals;
+}
+
 /// 나이스 학사일정 API의 한 이벤트(입학식, 시험, 방학식 등).
 class SchoolEvent {
   const SchoolEvent({required this.date, required this.name});

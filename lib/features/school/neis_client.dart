@@ -48,20 +48,34 @@ class NeisClient {
     required String schoolCode,
     required DateTime date,
   }) async {
+    final days = await fetchMealsInRange(
+      officeCode: officeCode,
+      schoolCode: schoolCode,
+      from: date,
+      to: date,
+    );
+    return days.isEmpty ? const [] : days.first.meals;
+  }
+
+  /// 지정한 기간의 급식을 날짜별로 묶어 반환한다. from~to의 모든 날짜가
+  /// 포함되며, 급식이 없는 날은 [DailyMeals.meals]가 비어 있다.
+  Future<List<DailyMeals>> fetchMealsInRange({
+    required String officeCode,
+    required String schoolCode,
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    final fromDate = DateTime(from.year, from.month, from.day);
+    final toDate = DateTime(to.year, to.month, to.day);
     final body = await _get('mealServiceDietInfo', {
       'ATPT_OFCDC_SC_CODE': officeCode,
       'SD_SCHUL_CODE': schoolCode,
-      'MLSV_YMD': DateFormat('yyyyMMdd').format(date),
+      'MLSV_FROM_YMD': DateFormat('yyyyMMdd').format(fromDate),
+      'MLSV_TO_YMD': DateFormat('yyyyMMdd').format(toDate),
+      'pSize': '100',
     });
     final rows = extractNeisRows(body, 'mealServiceDietInfo');
-    return rows
-        .map(
-          (row) => MealInfo(
-            mealName: (row['MMEAL_SC_NM'] as String?) ?? '급식',
-            menuItems: parseMenuItems((row['DDISH_NM'] as String?) ?? ''),
-          ),
-        )
-        .toList();
+    return groupMealsByDay(rows, from: fromDate, to: toDate);
   }
 
   /// 지정한 기간의 학사일정을 날짜순으로 가져온다. 매주 반복되는 토요휴업일,
@@ -159,6 +173,46 @@ List<Map<String, dynamic>> extractNeisRows(
     }
   }
   return const [];
+}
+
+DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+/// 나이스 급식 row 목록을 from~to의 날짜별 [DailyMeals]로 묶는다.
+/// 급식이 없는 날도 빈 meals로 포함하며, 같은 날 끼니는 조식→중식→석식 순으로 정렬한다.
+List<DailyMeals> groupMealsByDay(
+  List<Map<String, dynamic>> rows, {
+  required DateTime from,
+  required DateTime to,
+}) {
+  final fromDate = _dateOnly(from);
+  final toDate = _dateOnly(to);
+  final byDay = <DateTime, List<({int order, MealInfo meal})>>{};
+
+  for (final row in rows) {
+    final ymd = row['MLSV_YMD'] as String?;
+    if (ymd == null || ymd.length != 8) continue;
+    final date = _parseYmd(ymd);
+    final code = int.tryParse((row['MMEAL_SC_CODE'] as String?) ?? '') ?? 99;
+    final meal = MealInfo(
+      mealName: (row['MMEAL_SC_NM'] as String?) ?? '급식',
+      menuItems: parseMenuItems((row['DDISH_NM'] as String?) ?? ''),
+    );
+    byDay.putIfAbsent(date, () => []).add((order: code, meal: meal));
+  }
+
+  final result = <DailyMeals>[];
+  for (
+    var day = fromDate;
+    !day.isAfter(toDate);
+    day = day.add(const Duration(days: 1))
+  ) {
+    final entries = byDay[day] ?? const [];
+    final sorted = [...entries]..sort((a, b) => a.order.compareTo(b.order));
+    result.add(
+      DailyMeals(date: day, meals: sorted.map((e) => e.meal).toList()),
+    );
+  }
+  return result;
 }
 
 /// "쌀밥/잡곡밥<br/>어묵국<br/>돈육불고기 (5.6.10.13)" 형태의 원문을 메뉴 목록으로 바꾼다.

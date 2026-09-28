@@ -29,11 +29,32 @@ final mySchoolProvider = FutureProvider<SchoolSelection?>((ref) async {
 final todayMealProvider = FutureProvider<List<MealInfo>>((ref) async {
   final school = await ref.watch(mySchoolProvider.future);
   if (school == null) return const [];
-  return ref.watch(neisClientProvider)
-      .fetchMeals(
+  return ref.watch(neisClientProvider).fetchMeals(
+    officeCode: school.officeCode,
+    schoolCode: school.schoolCode,
+    date: DateTime.now(),
+  );
+});
+
+DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+/// 오늘이 속한 주의 월요일.
+DateTime mondayOfWeek(DateTime d) =>
+    _dateOnly(d).subtract(Duration(days: d.weekday - DateTime.monday));
+
+/// 등록한 학교의 이번 주(월~금) 급식. 학교 미등록 시 빈 목록.
+final weekMealsProvider = FutureProvider<List<DailyMeals>>((ref) async {
+  final school = await ref.watch(mySchoolProvider.future);
+  if (school == null) return const [];
+  final weekStart = mondayOfWeek(DateTime.now());
+  final weekEnd = weekStart.add(const Duration(days: 4));
+  return ref
+      .watch(neisClientProvider)
+      .fetchMealsInRange(
         officeCode: school.officeCode,
         schoolCode: school.schoolCode,
-        date: DateTime.now(),
+        from: weekStart,
+        to: weekEnd,
       );
 });
 

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/config/app_info.dart';
+import '../../core/widgets/app_mark.dart';
 import '../../core/supabase/supabase_provider.dart';
 import '../auth/auth_providers.dart';
 import '../board/board_providers.dart';
@@ -66,7 +67,12 @@ class MyPageScreen extends ConsumerWidget {
     final username = hasCredentials ? user?.email?.split('@').first : null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('내 정보')),
+      appBar: AppBar(
+        leading: const AppMark(),
+        leadingWidth: AppMark.leadingWidth,
+        titleSpacing: AppMark.titleSpacing,
+        title: const Text('내 정보'),
+      ),
       body: ListView(
         children: [
           if (profile != null)

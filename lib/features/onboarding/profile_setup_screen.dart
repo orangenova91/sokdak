@@ -100,11 +100,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             ),
           ),
           data: (regionList) {
-            final firstActive = regionList.where((r) => r.isActive).firstOrNull;
-            final selectedCode = _regionCode ?? firstActive?.code;
-            final selected = regionList
-                .where((r) => r.code == selectedCode)
-                .firstOrNull;
+            final selectedCode = _regionCode ?? regionList.firstOrNull?.code;
 
             return Align(
               alignment: Alignment.topCenter,
@@ -146,30 +142,18 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           initialValue: selectedCode,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
+                            helperText: '글에 지역이 함께 표시돼요.',
                           ),
                           items: [
                             for (final region in regionList)
                               DropdownMenuItem(
                                 value: region.code,
-                                child: Text(
-                                  region.isActive
-                                      ? region.name
-                                      : '${region.name} (준비 중)',
-                                ),
+                                child: Text(region.name),
                               ),
                           ],
                           onChanged: (code) =>
                               setState(() => _regionCode = code),
                         ),
-                        if (selected != null && !selected.isActive)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              '${selected.name} 지역은 아직 글쓰기가 열리지 않았어요. '
-                              '가입은 할 수 있고, 열리면 바로 이용할 수 있어요.',
-                              style: textTheme.bodySmall,
-                            ),
-                          ),
                         const SizedBox(height: 24),
                         Text('학교급', style: textTheme.titleSmall),
                         const SizedBox(height: 8),

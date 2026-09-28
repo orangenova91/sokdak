@@ -50,8 +50,8 @@ No sign-in is required. The app uses anonymous authentication (no email, phone n
 
 HOW TO TEST
 1. Launch the app, check the terms agreement box, and tap "시작하기" (Start).
-2. On the profile screen keep the default region "울산" (Ulsan), choose any school level (e.g. "고등"), and tap "완료" (Done).
-   IMPORTANT: Ulsan is currently the only region where posting is enabled. Other regions can be selected but are marked "준비 중" (coming soon) and posting is disabled there.
+2. On the profile screen choose any region (e.g. "울산") and school level (e.g. "고등"), then tap "완료" (Done).
+   Posting is available for all regions. The selected region is shown on posts as metadata.
 3. You can now browse the two boards (속닥방 / 노하우방), write a post with the pencil "글쓰기" button, react to posts, comment and reply.
 
 The app UI is in Korean. It is an anonymous community app for teachers in Korea.
