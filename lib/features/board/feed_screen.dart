@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,9 +20,12 @@ class FeedScreen extends ConsumerStatefulWidget {
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
+  Timer? _searchDebounce;
   String? _category;
+  String? _query;
 
-  FeedKey get _key => (board: widget.board, category: _category);
+  FeedKey get _key => (board: widget.board, category: _category, query: _query);
 
   @override
   void initState() {
@@ -30,8 +35,24 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    final trimmed = value.trim();
+    if (trimmed.length < 2) {
+      setState(() => _query = null);
+      return;
+    }
+    setState(() {});
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted || trimmed == _query) return;
+      setState(() => _query = trimmed);
+    });
   }
 
   void _onScroll() {
@@ -67,6 +88,31 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+            child: TextField(
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onChanged: _onSearchChanged,
+              decoration: InputDecoration(
+                isDense: true,
+                border: const OutlineInputBorder(),
+                hintText: '글 검색',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: '검색어 지우기',
+                        onPressed: () {
+                          _searchDebounce?.cancel();
+                          _searchController.clear();
+                          setState(() => _query = null);
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+              ),
+            ),
+          ),
           SizedBox(
             height: 48,
             child: ListView(
@@ -106,7 +152,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               data: (state) => RefreshIndicator(
                 onRefresh: _refresh,
                 child: state.posts.isEmpty
-                    ? const _EmptyFeed()
+                    ? _EmptyFeed(searching: _query != null)
                     : ListView.builder(
                         controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
@@ -159,20 +205,22 @@ class _CategoryChip extends StatelessWidget {
 }
 
 class _EmptyFeed extends StatelessWidget {
-  const _EmptyFeed();
+  const _EmptyFeed({required this.searching});
+
+  final bool searching;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      children: const [
+      children: [
         SizedBox(
           height: 320,
           child: Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                '아직 글이 없어요.\n첫 이야기를 남겨 보세요!',
+                searching ? '찾는 글이 없어요.' : '아직 글이 없어요.\n첫 이야기를 남겨 보세요!',
                 textAlign: TextAlign.center,
               ),
             ),
