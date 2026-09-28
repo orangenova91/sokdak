@@ -12,6 +12,7 @@ import '../../features/me/blocked_users_screen.dart';
 import '../../features/me/legal_screen.dart';
 import '../../features/me/legal_texts.dart';
 import '../../features/me/my_page_screen.dart';
+import '../../features/me/region_signup_screen.dart';
 import '../../features/onboarding/credentials_step_screen.dart';
 import '../../features/onboarding/profile_setup_screen.dart';
 import '../../features/onboarding/welcome_screen.dart';
@@ -135,6 +136,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/blocked',
         builder: (context, state) => const BlockedUsersScreen(),
+      ),
+      GoRoute(
+        path: '/region-signup',
+        builder: (context, state) => const RegionSignupScreen(),
       ),
       GoRoute(
         path: '/school-search',

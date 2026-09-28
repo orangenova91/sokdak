@@ -10,6 +10,7 @@ import '../auth/auth_providers.dart';
 import '../board/board_providers.dart';
 import '../board/report_sheet.dart';
 import '../profile/profile_providers.dart';
+import 'region_signup.dart';
 
 class MyPageScreen extends ConsumerWidget {
   const MyPageScreen({super.key});
@@ -63,6 +64,7 @@ class MyPageScreen extends ConsumerWidget {
         .firstOrNull
         ?.name;
     final hasCredentials = ref.watch(hasCredentialsProvider);
+    final signupStats = ref.watch(regionSignupStatsProvider);
     final user = ref.watch(currentUserProvider);
     final username = hasCredentials ? user?.email?.split('@').first : null;
 
@@ -102,6 +104,12 @@ class MyPageScreen extends ConsumerWidget {
               ),
             ),
           const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.groups_outlined),
+            title: const Text('지역별 가입 통계'),
+            subtitle: Text(_myRegionSummary(signupStats, profile?.regionCode)),
+            onTap: () => context.push('/region-signup'),
+          ),
           // 가입 과정에서 아이디·비밀번호를 필수로 만들기 때문에, 정상적인 계정이라면
           // 이 화면에 도달했을 때는 항상 설정이 끝나 있다.
           if (hasCredentials)
@@ -156,4 +164,19 @@ class MyPageScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _myRegionSummary(
+  AsyncValue<List<RegionSignupStat>> stats,
+  String? regionCode,
+) {
+  return stats.maybeWhen(
+    data: (list) {
+      final mine = list
+          .where((stat) => stat.regionCode == regionCode)
+          .firstOrNull;
+      return mine?.summaryLabel ?? '지역별 가입 통계';
+    },
+    orElse: () => '지역별 가입 통계',
+  );
 }

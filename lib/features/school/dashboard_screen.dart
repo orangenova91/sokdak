@@ -64,7 +64,21 @@ class _DashboardAppBar extends ConsumerWidget implements PreferredSizeWidget {
       leading: const AppMark(),
       leadingWidth: AppMark.leadingWidth,
       titleSpacing: AppMark.titleSpacing,
-      title: const Text('대시보드'),
+      title: Row(
+        children: [
+          const Text('대시보드'),
+          Expanded(
+            child: Center(
+              child: IconButton(
+                tooltip: '지역별 가입 통계',
+                visualDensity: VisualDensity.compact,
+                onPressed: () => context.push('/region-signup'),
+                icon: const Icon(Icons.bar_chart_outlined),
+              ),
+            ),
+          ),
+        ],
+      ),
       actions: [
         if (schoolName != null)
           Center(
