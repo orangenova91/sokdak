@@ -16,7 +16,8 @@ class AppUpdateStatus {
 }
 
 final appUpdateStatusProvider = FutureProvider<AppUpdateStatus>((ref) async {
-  if (!Env.isConfigured) return const AppUpdateStatus.allowed();
+  // 웹은 배포 즉시 최신 빌드가 내려가므로 스토어 업데이트 검사가 필요 없다.
+  if (kIsWeb || !Env.isConfigured) return const AppUpdateStatus.allowed();
 
   final raw = await ref.watch(supabaseProvider).rpc('app_update_requirement');
   final row = _firstRow(raw);

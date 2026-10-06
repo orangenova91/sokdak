@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,7 +18,21 @@ class SokdakApp extends ConsumerWidget {
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         routerConfig: ref.watch(appRouterProvider),
+        builder: kIsWeb ? _phoneWidthFrame : null,
       ),
     );
   }
+}
+
+/// 웹에서 넓은 화면(노트북·프로젝터)으로 열어도 휴대폰 폭으로 가운데에 보이게 한다.
+Widget _phoneWidthFrame(BuildContext context, Widget? child) {
+  return ColoredBox(
+    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+    child: Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: child,
+      ),
+    ),
+  );
 }
