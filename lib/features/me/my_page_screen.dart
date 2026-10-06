@@ -4,11 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/config/app_info.dart';
+import '../../core/widgets/app_mark.dart';
 import '../../core/supabase/supabase_provider.dart';
 import '../auth/auth_providers.dart';
 import '../board/board_providers.dart';
 import '../board/report_sheet.dart';
 import '../profile/profile_providers.dart';
+import 'region_signup.dart';
 
 class MyPageScreen extends ConsumerWidget {
   const MyPageScreen({super.key});
@@ -62,11 +64,17 @@ class MyPageScreen extends ConsumerWidget {
         .firstOrNull
         ?.name;
     final hasCredentials = ref.watch(hasCredentialsProvider);
+    final signupStats = ref.watch(regionSignupStatsProvider);
     final user = ref.watch(currentUserProvider);
     final username = hasCredentials ? user?.email?.split('@').first : null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('내 정보')),
+      appBar: AppBar(
+        leading: const AppMark(),
+        leadingWidth: AppMark.leadingWidth,
+        titleSpacing: AppMark.titleSpacing,
+        title: const Text('내 정보'),
+      ),
       body: ListView(
         children: [
           if (profile != null)
@@ -96,6 +104,14 @@ class MyPageScreen extends ConsumerWidget {
               ),
             ),
           const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.groups_outlined),
+            title: const Text('지역별 가입 통계'),
+            subtitle: Text(_myRegionSummary(signupStats, profile?.regionCode)),
+            onTap: () => context.push('/region-signup'),
+          ),
+          // 가입 과정에서 아이디·비밀번호를 필수로 만들기 때문에, 정상적인 계정이라면
+          // 이 화면에 도달했을 때는 항상 설정이 끝나 있다.
           if (hasCredentials)
             ListTile(
               leading: Icon(
@@ -104,13 +120,6 @@ class MyPageScreen extends ConsumerWidget {
               ),
               title: const Text('계정 보호 설정됨'),
               subtitle: Text('아이디: $username'),
-            )
-          else
-            ListTile(
-              leading: const Icon(Icons.lock_outline),
-              title: const Text('계정 보호 설정'),
-              subtitle: const Text('아이디·비밀번호를 만들어 다른 기기에서도 로그인할 수 있어요'),
-              onTap: () => context.push('/credentials'),
             ),
           ListTile(
             leading: const Icon(Icons.block),
@@ -155,4 +164,19 @@ class MyPageScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+String _myRegionSummary(
+  AsyncValue<List<RegionSignupStat>> stats,
+  String? regionCode,
+) {
+  return stats.maybeWhen(
+    data: (list) {
+      final mine = list
+          .where((stat) => stat.regionCode == regionCode)
+          .firstOrNull;
+      return mine?.summaryLabel ?? '지역별 가입 통계';
+    },
+    orElse: () => '지역별 가입 통계',
+  );
 }

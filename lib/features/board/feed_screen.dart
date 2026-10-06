@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../profile/profile_providers.dart';
+import '../../core/widgets/app_mark.dart';
 import 'board_providers.dart';
 import 'models.dart';
 import 'post_card.dart';
@@ -18,9 +20,12 @@ class FeedScreen extends ConsumerStatefulWidget {
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
   final _scrollController = ScrollController();
+  final _searchController = TextEditingController();
+  Timer? _searchDebounce;
   String? _category;
+  String? _query;
 
-  FeedKey get _key => (board: widget.board, category: _category);
+  FeedKey get _key => (board: widget.board, category: _category, query: _query);
 
   @override
   void initState() {
@@ -30,8 +35,24 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String value) {
+    _searchDebounce?.cancel();
+    final trimmed = value.trim();
+    if (trimmed.length < 2) {
+      setState(() => _query = null);
+      return;
+    }
+    setState(() {});
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted || trimmed == _query) return;
+      setState(() => _query = trimmed);
+    });
   }
 
   void _onScroll() {
@@ -49,22 +70,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final profile = ref.watch(myProfileProvider).value;
-    final regions = ref.watch(regionsProvider).value;
-    final region = regions
-        ?.where((r) => r.code == profile?.regionCode)
-        .firstOrNull;
     final categories =
         ref.watch(categoriesProvider(widget.board)).value ?? const [];
     final feed = ref.watch(feedProvider(_key));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          region == null
-              ? widget.board.label
-              : '${region.name} ${widget.board.label}',
-        ),
+        leading: const AppMark(),
+        leadingWidth: AppMark.leadingWidth,
+        titleSpacing: AppMark.titleSpacing,
+        title: Text(widget.board.label),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/compose/${widget.board.value}'),
@@ -73,6 +88,31 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+            child: TextField(
+              controller: _searchController,
+              textInputAction: TextInputAction.search,
+              onChanged: _onSearchChanged,
+              decoration: InputDecoration(
+                isDense: true,
+                border: const OutlineInputBorder(),
+                hintText: '글 검색',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: '검색어 지우기',
+                        onPressed: () {
+                          _searchDebounce?.cancel();
+                          _searchController.clear();
+                          setState(() => _query = null);
+                        },
+                        icon: const Icon(Icons.close),
+                      ),
+              ),
+            ),
+          ),
           SizedBox(
             height: 48,
             child: ListView(
@@ -112,7 +152,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               data: (state) => RefreshIndicator(
                 onRefresh: _refresh,
                 child: state.posts.isEmpty
-                    ? _EmptyFeed(regionReady: region?.isActive ?? true)
+                    ? _EmptyFeed(searching: _query != null)
                     : ListView.builder(
                         controller: _scrollController,
                         physics: const AlwaysScrollableScrollPhysics(),
@@ -165,13 +205,12 @@ class _CategoryChip extends StatelessWidget {
 }
 
 class _EmptyFeed extends StatelessWidget {
-  const _EmptyFeed({required this.regionReady});
+  const _EmptyFeed({required this.searching});
 
-  final bool regionReady;
+  final bool searching;
 
   @override
   Widget build(BuildContext context) {
-    // RefreshIndicator가 동작하려면 스크롤 가능한 위젯이어야 한다.
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
@@ -181,9 +220,7 @@ class _EmptyFeed extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
-                regionReady
-                    ? '아직 글이 없어요.\n첫 이야기를 남겨 보세요!'
-                    : '이 지역은 아직 준비 중이에요.\n열리면 바로 이용할 수 있어요.',
+                searching ? '찾는 글이 없어요.' : '아직 글이 없어요.\n첫 이야기를 남겨 보세요!',
                 textAlign: TextAlign.center,
               ),
             ),

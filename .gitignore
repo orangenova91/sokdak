@@ -49,3 +49,6 @@ app.*.map.json
 /supabase/.temp
 /supabase/.env
 /.env.json
+
+# Instagram marketing assets (local only)
+marketing/instagram/

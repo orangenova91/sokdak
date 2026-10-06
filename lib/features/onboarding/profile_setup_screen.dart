@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../auth/auth_providers.dart';
 import '../profile/nickname_generator.dart';
 import '../profile/profile.dart';
 import '../profile/profile_providers.dart';
 
+/// 가입 2단계: 아이디·비밀번호를 이미 설정한 계정에 닉네임·지역·학교급을 붙인다.
 class ProfileSetupScreen extends ConsumerStatefulWidget {
   const ProfileSetupScreen({super.key});
 
@@ -72,7 +74,15 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     final regions = ref.watch(regionsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('프로필 만들기')),
+      appBar: AppBar(
+        title: const Text('프로필 만들기'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: '아이디·비밀번호 고치기',
+          // 계정 보호는 이미 끝났으니 로그아웃하지 않고 1단계로 돌아가 값만 고친다.
+          onPressed: _submitting ? null : () => context.go('/credentials-step'),
+        ),
+      ),
       body: SafeArea(
         child: regions.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -90,11 +100,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             ),
           ),
           data: (regionList) {
-            final firstActive = regionList.where((r) => r.isActive).firstOrNull;
-            final selectedCode = _regionCode ?? firstActive?.code;
-            final selected = regionList
-                .where((r) => r.code == selectedCode)
-                .firstOrNull;
+            final selectedCode = _regionCode ?? regionList.firstOrNull?.code;
 
             return Align(
               alignment: Alignment.topCenter,
@@ -136,30 +142,18 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           initialValue: selectedCode,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
+                            helperText: '글에 지역이 함께 표시돼요.',
                           ),
                           items: [
                             for (final region in regionList)
                               DropdownMenuItem(
                                 value: region.code,
-                                child: Text(
-                                  region.isActive
-                                      ? region.name
-                                      : '${region.name} (준비 중)',
-                                ),
+                                child: Text(region.name),
                               ),
                           ],
                           onChanged: (code) =>
                               setState(() => _regionCode = code),
                         ),
-                        if (selected != null && !selected.isActive)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Text(
-                              '${selected.name} 지역은 아직 글쓰기가 열리지 않았어요. '
-                              '가입은 할 수 있고, 열리면 바로 이용할 수 있어요.',
-                              style: textTheme.bodySmall,
-                            ),
-                          ),
                         const SizedBox(height: 24),
                         Text('학교급', style: textTheme.titleSmall),
                         const SizedBox(height: 8),

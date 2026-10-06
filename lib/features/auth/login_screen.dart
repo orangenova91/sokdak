@@ -42,7 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             password: _passwordController.text,
           );
       // 로그인에 성공하면 라우터가 자동으로 홈으로 보낸다.
-      if (mounted) context.go('/');
+      if (mounted) context.go('/dashboard');
     } on InvalidCredentialsException {
       if (!mounted) return;
       setState(() => _error = '아이디 또는 비밀번호가 올바르지 않아요.');

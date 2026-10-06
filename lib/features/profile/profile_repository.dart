@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../me/region_signup.dart';
 import 'profile.dart';
 
 class ProfileRepository {
@@ -22,6 +23,14 @@ class ProfileRepository {
         .select()
         .order('sort_order', ascending: true);
     return rows.map(Region.fromJson).toList();
+  }
+
+  Future<List<RegionSignupStat>> fetchRegionSignupStats() async {
+    final rows = await _client.rpc('region_signup_stats');
+    return [
+      for (final row in rows as List)
+        RegionSignupStat.fromJson(Map<String, dynamic>.from(row as Map)),
+    ];
   }
 
   Future<void> createProfile({

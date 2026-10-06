@@ -2,6 +2,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'models.dart';
 
+/// 제목 또는 본문에 [query]가 포함된 글을 찾는 PostgREST `or` 필터.
+/// 닉네임은 검색하지 않는다.
+String postTextSearchFilter(String query) {
+  final escaped = query
+      .replaceAll(r'\', r'\\')
+      .replaceAll('%', r'\%')
+      .replaceAll('_', r'\_')
+      .replaceAll('"', r'\"');
+  final pattern = '"%$escaped%"';
+  return 'title.ilike.$pattern,body.ilike.$pattern';
+}
+
 /// 이미 신고한 대상을 다시 신고했을 때 던진다.
 class AlreadyReportedException implements Exception {
   const AlreadyReportedException();
@@ -32,8 +44,8 @@ class BoardRepository {
 
   Future<List<Post>> fetchPosts({
     required Board board,
-    required String regionCode,
     String? category,
+    String? queryText,
     DateTime? before,
     int limit = 20,
   }) async {
@@ -41,9 +53,10 @@ class BoardRepository {
         .from('posts')
         .select(_postSelect)
         .eq('board', board.value)
-        .eq('region_code', regionCode)
         .eq('is_hidden', false);
     if (category != null) query = query.eq('category', category);
+    final search = queryText?.trim() ?? '';
+    if (search.length >= 2) query = query.or(postTextSearchFilter(search));
     if (before != null) {
       query = query.lt('created_at', before.toUtc().toIso8601String());
     }

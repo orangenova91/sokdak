@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// 하단 탭(속닥방 / 노하우방 / 내 정보)을 가진 메인 화면 틀.
+/// 하단 탭(대시보드 / 속닥방 / 노하우방 / 내 정보)을 가진 메인 화면 틀.
 class MainShell extends StatelessWidget {
   const MainShell({super.key, required this.navigationShell});
 
@@ -19,6 +19,11 @@ class MainShell extends StatelessWidget {
           initialLocation: index == navigationShell.currentIndex,
         ),
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: '대시보드',
+          ),
           NavigationDestination(
             icon: Icon(Icons.forum_outlined),
             selectedIcon: Icon(Icons.forum),

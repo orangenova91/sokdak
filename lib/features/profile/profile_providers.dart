@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/supabase/supabase_provider.dart';
 import '../auth/auth_providers.dart';
+import '../me/region_signup.dart';
 import 'profile.dart';
 import 'profile_repository.dart';
 
@@ -14,6 +15,14 @@ final myProfileProvider = FutureProvider<Profile?>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
   return ref.watch(profileRepositoryProvider).fetchProfile(user.id);
+});
+
+final regionSignupStatsProvider = FutureProvider<List<RegionSignupStat>>((
+  ref,
+) async {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return const [];
+  return ref.watch(profileRepositoryProvider).fetchRegionSignupStats();
 });
 
 final regionsProvider = FutureProvider<List<Region>>((ref) async {

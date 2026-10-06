@@ -22,7 +22,8 @@ final categoriesProvider = FutureProvider.family<List<Category>, Board>((
 // ---- 피드 ----
 
 /// 피드 하나를 식별하는 키. category가 null이면 "전체".
-typedef FeedKey = ({Board board, String? category});
+/// query는 두 글자 이상일 때만 제목·본문 검색이다.
+typedef FeedKey = ({Board board, String? category, String? query});
 
 class FeedState {
   const FeedState({
@@ -58,8 +59,8 @@ class FeedController extends AsyncNotifier<FeedState> {
         .read(boardRepositoryProvider)
         .fetchPosts(
           board: key.board,
-          regionCode: profile.regionCode,
           category: key.category,
+          queryText: key.query,
           before: before,
           limit: pageSize,
         );
@@ -95,6 +96,20 @@ final feedProvider =
     AsyncNotifierProvider.family<FeedController, FeedState, FeedKey>(
       FeedController.new,
     );
+
+/// 대시보드용 최근 글 미리보기. 게시판당 최신 2개.
+const dashboardPreviewLimit = 2;
+
+final dashboardPreviewProvider = FutureProvider.family<List<Post>, Board>((
+  ref,
+  board,
+) async {
+  final profile = await ref.watch(myProfileProvider.future);
+  if (profile == null) return const [];
+  return ref
+      .watch(boardRepositoryProvider)
+      .fetchPosts(board: board, limit: dashboardPreviewLimit);
+});
 
 // ---- 글 상세 ----
 

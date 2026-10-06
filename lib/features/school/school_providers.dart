@@ -1,0 +1,79 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+
+import '../../core/config/env.dart';
+import '../../core/supabase/supabase_provider.dart';
+import '../auth/auth_providers.dart';
+import 'neis_client.dart';
+import 'school.dart';
+import 'school_repository.dart';
+
+final neisClientProvider = Provider<NeisClient>((ref) {
+  final client = http.Client();
+  ref.onDispose(client.close);
+  return NeisClient(client, apiKey: Env.neisApiKey);
+});
+
+final schoolRepositoryProvider = Provider<SchoolRepository>((ref) {
+  return SchoolRepository(ref.watch(supabaseProvider));
+});
+
+/// 로그인한 사용자가 등록한 학교. 등록하지 않았으면 null.
+final mySchoolProvider = FutureProvider<SchoolSelection?>((ref) async {
+  final user = ref.watch(currentUserProvider);
+  if (user == null) return null;
+  return ref.watch(schoolRepositoryProvider).fetchMySchool(user.id);
+});
+
+/// 등록한 학교의 오늘 급식. 학교 미등록 시 빈 목록.
+final todayMealProvider = FutureProvider<List<MealInfo>>((ref) async {
+  final school = await ref.watch(mySchoolProvider.future);
+  if (school == null) return const [];
+  return ref.watch(neisClientProvider).fetchMeals(
+    officeCode: school.officeCode,
+    schoolCode: school.schoolCode,
+    date: DateTime.now(),
+  );
+});
+
+DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
+
+/// 오늘이 속한 주의 월요일.
+DateTime mondayOfWeek(DateTime d) =>
+    _dateOnly(d).subtract(Duration(days: d.weekday - DateTime.monday));
+
+/// 등록한 학교의 이번 주(월~금) 급식. 학교 미등록 시 빈 목록.
+final weekMealsProvider = FutureProvider<List<DailyMeals>>((ref) async {
+  final school = await ref.watch(mySchoolProvider.future);
+  if (school == null) return const [];
+  final weekStart = mondayOfWeek(DateTime.now());
+  final weekEnd = weekStart.add(const Duration(days: 4));
+  return ref
+      .watch(neisClientProvider)
+      .fetchMealsInRange(
+        officeCode: school.officeCode,
+        schoolCode: school.schoolCode,
+        from: weekStart,
+        to: weekEnd,
+      );
+});
+
+/// 주간 달력에서 앞뒤로 넘겨볼 수 있는 범위. 오늘 기준 과거/미래로 이만큼 가져와서
+/// 한 번의 API 호출로 여러 주를 스와이프해서 볼 수 있게 한다.
+const scheduleWindowPastDays = 90;
+const scheduleWindowFutureDays = 180;
+
+/// 등록한 학교의 학사일정(오늘 기준 -90일 ~ +180일). 학교 미등록 시 빈 목록.
+final scheduleEventsProvider = FutureProvider<List<SchoolEvent>>((ref) async {
+  final school = await ref.watch(mySchoolProvider.future);
+  if (school == null) return const [];
+  final today = DateTime.now();
+  final todayDate = DateTime(today.year, today.month, today.day);
+  return ref.watch(neisClientProvider)
+      .fetchSchedule(
+        officeCode: school.officeCode,
+        schoolCode: school.schoolCode,
+        from: todayDate.subtract(const Duration(days: scheduleWindowPastDays)),
+        to: todayDate.add(const Duration(days: scheduleWindowFutureDays)),
+      );
+});

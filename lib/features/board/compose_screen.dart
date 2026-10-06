@@ -70,9 +70,9 @@ class _ComposeScreenState extends ConsumerState<ComposeScreen> {
       if (!mounted) return;
       setState(() {
         _submitting = false;
-        // 42501: RLS 위반 (열리지 않은 지역, 인증 필요 등)
+        // 42501: RLS 위반 (교사 인증 필요 등)
         _error = e.code == '42501'
-            ? '지금은 글을 쓸 수 없어요. 내 지역이 아직 열리지 않았거나 교사 인증이 필요할 수 있어요.'
+            ? '지금은 글을 쓸 수 없어요. 교사 인증이 필요할 수 있어요.'
             : '글을 올리지 못했어요. 잠시 후 다시 시도해 주세요.';
       });
     } catch (_) {
