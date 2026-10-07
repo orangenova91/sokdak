@@ -52,3 +52,5 @@ app.*.map.json
 
 # Instagram marketing assets (local only)
 marketing/instagram/
+.vercel
+.env*
